@@ -9,6 +9,7 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
         .container {
             position: relative;
@@ -27,34 +28,40 @@
             right: 20px;
             width: 200px;
             height: 200px;
-            background: rgba(255, 255, 255, 0.8);
+            background: white;
             border: 2px solid #333;
             border-radius: 8px;
             z-index: 100;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            background-image: url('https://arcg.is/1XPnr2'); /* Замените на свою карту */
-            background-size: cover;
-            transition: all 0.3s;
+            padding: 10px;
+            box-sizing: border-box;
         }
-        .floor-map:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        .map-title {
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
-        /* Индикатор положения на карте */
+        .map-image {
+            width: 100%;
+            height: calc(100% - 25px);
+            object-fit: contain;
+            background-color: #f5f5f5;
+        }
         .position-indicator {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background: red;
             border-radius: 50%;
-            top: 50%;
-            left: 50%;
+            border: 2px solid white;
             transform: translate(-50%, -50%);
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Основная панорама -->
         <iframe 
             src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
             allowfullscreen
@@ -62,29 +69,38 @@
             referrerpolicy="no-referrer-when-downgrade">
         </iframe>
         
-        <div class="floor-map" id="floorMap">
-            <div class="position-indicator"></div>
+        <!-- Карта этажа -->
+        <div class="floor-map">
+            <div class="map-title">1 этаж</div>
+            <div style="position: relative; height: 100%;">
+                <!-- Встроенное изображение карты (base64) -->
+                <img class="map-image" src="floorplan.jpg" alt="Карта этажа">
+                <div class="position-indicator" style="top: 30%; left: 40%;"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Пример обработки кликов по карте
-        document.getElementById('floorMap').addEventListener('click', function(e) {
-            alert('Клик по карте этажа! Здесь можно добавить логику перехода между помещениями');
-            
-            // Пример: можно открыть другую панораму при клике
-            // document.querySelector('iframe').src = 'https://www.google.com/maps/embed?pb=!4v1748532464536!6m8!1m7!1sCAoSHENJQUJJaEFEeWRWZ1RRRm5UV2dNZzlNQUNRdFA.!2m2!1d54.72317498809958!2d55.94093694273743!3f0!4f0!5f0.7820865974627469" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+        // Обновление позиции индикатора при движении
+        document.querySelector('iframe').addEventListener('load', function() {
+            // В реальном проекте здесь будет логика отслеживания положения
+            setInterval(function() {
+                const indicator = document.querySelector('.position-indicator');
+                // Случайное движение для демонстрации
+                const randomX = 20 + Math.random() * 60;
+                const randomY = 20 + Math.random() * 60;
+                indicator.style.left = randomX + '%';
+                indicator.style.top = randomY + '%';
+            }, 2000);
         });
 
-        // Пример обновления позиции индикатора (можно привязать к событиям iframe)
-        function updatePosition(xPercent, yPercent) {
-            const indicator = document.querySelector('.position-indicator');
-            indicator.style.left = xPercent + '%';
-            indicator.style.top = yPercent + '%';
-        }
-        
-        // Тестовое перемещение индикатора (в реальном проекте привязывайте к данным)
-        setTimeout(() => updatePosition(30, 70), 1000);
+        // Клик по карте для навигации
+        document.querySelector('.map-image').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(0);
+            const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(0);
+            alert(Клик по карте: X=${x}%, Y=${y}%\nЗдесь можно реализовать переход в выбранную зону);
+        });
     </script>
 </body>
 </html>
