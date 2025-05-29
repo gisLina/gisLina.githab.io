@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Панорама с картой этажа</title>
+    <title>Комбинированная карта с панорамой и планом этажа</title>
     <style>
         body, html {
             margin: 0;
@@ -15,8 +15,26 @@
             position: relative;
             width: 100%;
             height: 100vh;
+            display: flex;
         }
-        iframe {
+        /* Стили для панорамы */
+        .panorama-container {
+            flex: 3;
+            position: relative;
+            height: 100%;
+        }
+        .panorama {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /* Стили для карты ArcGIS */
+        .arcgis-container {
+            flex: 2;
+            height: 100%;
+            position: relative;
+        }
+        .arcgis-map {
             width: 100%;
             height: 100%;
             border: none;
@@ -57,49 +75,110 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
         }
+        /* Переключатель режимов */
+        .view-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 200;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Основная панорама -->
-        <iframe 
-            src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
+        <!-- Левая часть - панорама -->
+        <div class="panorama-container">
+            <iframe 
+                class="panorama"
+                src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
         
-        <!-- Карта этажа -->
+        <!-- Правая часть - карта ArcGIS -->
+        <div class="arcgis-container">
+            <iframe 
+                class="arcgis-map"
+                src="https://www.arcgis.com/apps/mapviewer/index.html?webmap=e9bd9af2f284423c8c9641670a843c6f"
+                allowfullscreen
+                allow="geolocation">
+            </iframe>
+        </div>
+        
+        <!-- Карта этажа (общая для обоих режимов) -->
         <div class="floor-map">
             <div class="map-title">1 этаж</div>
             <div style="position: relative; height: 100%;">
-                <!-- Встроенное изображение карты (base64) -->
                 <img class="map-image" src="floorplan.jpg" alt="Карта этажа">
-                <div class="position-indicator" style="top: 30%; left: 40%;"></div>
+                <div class="position-indicator" id="positionIndicator" style="top: 30%; left: 40%;"></div>
             </div>
         </div>
+        
+        <!-- Кнопка переключения режимов -->
+        <div class="view-toggle" id="viewToggle">Показать только панораму</div>
     </div>
-
-    <script>
-        // Обновление позиции индикатора при движении
-        document.querySelector('iframe').addEventListener('load', function() {
-            // В реальном проекте здесь будет логика отслеживания положения
-            setInterval(function() {
-                const indicator = document.querySelector('.position-indicator');
-                // Случайное движение для демонстрации
-                const randomX = 20 + Math.random() * 60;
-                const randomY = 20 + Math.random() * 60;
-                indicator.style.left = randomX + '%';
-                indicator.style.top = randomY + '%';
-            }, 2000);
+<script>
+        // Элементы управления
+        const panoramaContainer = document.querySelector('.panorama-container');
+        const arcgisContainer = document.querySelector('.arcgis-container');
+        const viewToggle = document.getElementById('viewToggle');
+        const positionIndicator = document.getElementById('positionIndicator');
+        
+        // Переключение между режимами
+        viewToggle.addEventListener('click', function() {
+            if (arcgisContainer.style.display === 'none') {
+                arcgisContainer.style.display = 'block';
+                panoramaContainer.style.flex = '3';
+                this.textContent = 'Показать только панораму';
+            } else {
+                arcgisContainer.style.display = 'none';
+                panoramaContainer.style.flex = '1';
+                this.textContent = 'Показать обе карты';
+            }
         });
-
-        // Клик по карте для навигации
+        
+        // Обновление позиции индикатора (демо-режим)
+        setInterval(function() {
+            const randomX = 20 + Math.random() * 60;
+            const randomY = 20 + Math.random() * 60;
+            positionIndicator.style.left = randomX + '%';
+            positionIndicator.style.top = randomY + '%';
+        }, 2000);
+        
+        // Обработка кликов по карте этажа
         document.querySelector('.map-image').addEventListener('click', function(e) {
             const rect = this.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(0);
             const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(0);
-            alert(Клик по карте: X=${x}%, Y=${y}%\nЗдесь можно реализовать переход в выбранную зону);
+            
+            // Здесь можно добавить логику синхронизации с картами
+            console.log(Клик по координатам: X=${x}%, Y=${y}%);
+            
+            // Пример: центрирование ArcGIS карты по клику
+            const arcgisIframe = document.querySelector('.arcgis-map');
+            if (arcgisIframe.contentWindow) {
+                const message = {
+                    action: 'setCenter',
+                    coordinates: [55.941169 + (x-50)/1000, 54.724925 + (y-50)/1000]
+                };
+                arcgisIframe.contentWindow.postMessage(message, '*');
+            }
+        });
+        
+        // Обработчик сообщений от ArcGIS (если нужно)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.action === 'positionUpdate') {
+                // Обновление позиции индикатора на плане этажа
+                positionIndicator.style.left = (event.data.x * 100) + '%';
+                positionIndicator.style.top = (event.data.y * 100) + '%';
+            }
         });
     </script>
 </body>
