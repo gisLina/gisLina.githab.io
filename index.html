@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Панорама с картой этажа</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        /* Стили для панорамы */
+        .panorama {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        /* Стили для карты ArcGIS */
+        .arcgis-map {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            display: none;
+        }
+        /* Стили для карты этажа */
+        .floor-map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .map-title {
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .map-image {
+            width: 100%;
+            height: calc(100% - 25px);
+            object-fit: contain;
+            background-color: #f5f5f5;
+        }
+        .position-indicator {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: red;
+            border-radius: 50%;
+            border: 2px solid white;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        /* Кнопки управления */
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 200;
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+        .control-btn:hover {
+            background: #f0f0f0;
+        }
+        /* Разделённый режим */
+        .split-mode .panorama {
+            width: 50%;
+        }
+        .split-mode .arcgis-map {
+            display: block;
+            left: 50%;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <!-- Основная панорама -->
+        <iframe 
+            class="panorama"
+            id="panoramaView"
+            src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+        
+        <!-- Карта ArcGIS (изначально скрыта) -->
+        <iframe 
+            class="arcgis-map"
+            id="arcgisView"
+            src="https://www.arcgis.com/apps/mapviewer/index.html?webmap=e9bd9af2f284423c8c9641670a843c6f"
+            allowfullscreen
+            allow="geolocation">
+        </iframe>
+        
+        <!-- Карта этажа -->
+        <div class="floor-map">
+            <div class="map-title">1 этаж</div>
+            <div style="position: relative; height: 100%;">
+                <img class="map-image" src="floorplan.jpg" alt="Карта этажа">
+<div class="position-indicator" id="positionIndicator" style="top: 30%; left: 40%;"></div>
+            </div>
+        </div>
+        
+        <!-- Панель управления -->
+        <div class="control-panel">
+            <button class="control-btn" id="panoramaBtn">Только панорама</button>
+            <button class="control-btn" id="arcgisBtn">Только карта</button>
+            <button class="control-btn" id="splitBtn">Разделённый вид</button>
+        </div>
+    </div>
+
+    <script>
+        // Элементы управления
+        const mainContainer = document.getElementById('mainContainer');
+        const panoramaView = document.getElementById('panoramaView');
+        const arcgisView = document.getElementById('arcgisView');
+        const panoramaBtn = document.getElementById('panoramaBtn');
+        const arcgisBtn = document.getElementById('arcgisBtn');
+        const splitBtn = document.getElementById('splitBtn');
+        const positionIndicator = document.getElementById('positionIndicator');
+        
+        // Режимы отображения
+        function showPanoramaOnly() {
+            mainContainer.classList.remove('split-mode');
+            panoramaView.style.display = 'block';
+            arcgisView.style.display = 'none';
+        }
+        
+        function showArcGISOnly() {
+            mainContainer.classList.remove('split-mode');
+            panoramaView.style.display = 'none';
+            arcgisView.style.display = 'block';
+        }
+        
+        function showSplitView() {
+            mainContainer.classList.add('split-mode');
+            panoramaView.style.display = 'block';
+            arcgisView.style.display = 'block';
+        }
+        
+        // Обработчики кнопок
+        panoramaBtn.addEventListener('click', showPanoramaOnly);
+        arcgisBtn.addEventListener('click', showArcGISOnly);
+        splitBtn.addEventListener('click', showSplitView);
+        
+        // По умолчанию показываем только панораму
+        showPanoramaOnly();
+        
+        // Обновление позиции индикатора (демо-режим)
+        setInterval(function() {
+            const randomX = 20 + Math.random() * 60;
+            const randomY = 20 + Math.random() * 60;
+            positionIndicator.style.left = randomX + '%';
+            positionIndicator.style.top = randomY + '%';
+        }, 2000);
+        
+        // Обработка кликов по карте этажа
+        document.querySelector('.map-image').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(0);
+            const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(0);
+            
+            console.log(Клик по координатам: X=${x}%, Y=${y}%);
+            
+            // Здесь можно добавить логику обновления обеих карт
+        });
+    </script>
+</body>
+</html>
