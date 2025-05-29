@@ -2,17 +2,89 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Карта в GitHub Pages</title>
+    <title>Панорама с картой этажа</title>
     <style>
-        iframe { width: 100%; height: 100vh; border: none; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /* Стили для карты этажа */
+        .floor-map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #333;
+            border-radius: 8px;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            background-image: url('https://arcg.is/1XPnr2'); /* Замените на свою карту */
+            background-size: cover;
+            transition: all 0.3s;
+        }
+        .floor-map:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        }
+        /* Индикатор положения на карте */
+        .position-indicator {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
-    <iframe 
-        src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
+    <div class="container">
+        <iframe 
+            src="https://www.google.com/maps/embed?pb=!4v1748530401788!6m8!1m7!1sCAoSHENJQUJJaEFEeWNLemtDWHd2bWdET1VBQUJjZ0g.!2m2!1d54.72492597238116!2d55.94116966697189!3f321.52651861422254!4f-15.409967807972876!5f0.7820865974627469"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+        
+        <div class="floor-map" id="floorMap">
+            <div class="position-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // Пример обработки кликов по карте
+        document.getElementById('floorMap').addEventListener('click', function(e) {
+            alert('Клик по карте этажа! Здесь можно добавить логику перехода между помещениями');
+            
+            // Пример: можно открыть другую панораму при клике
+            // document.querySelector('iframe').src = 'https://www.google.com/maps/embed?pb=!4v1748532464536!6m8!1m7!1sCAoSHENJQUJJaEFEeWRWZ1RRRm5UV2dNZzlNQUNRdFA.!2m2!1d54.72317498809958!2d55.94093694273743!3f0!4f0!5f0.7820865974627469" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+        });
+
+        // Пример обновления позиции индикатора (можно привязать к событиям iframe)
+        function updatePosition(xPercent, yPercent) {
+            const indicator = document.querySelector('.position-indicator');
+            indicator.style.left = xPercent + '%';
+            indicator.style.top = yPercent + '%';
+        }
+        
+        // Тестовое перемещение индикатора (в реальном проекте привязывайте к данным)
+        setTimeout(() => updatePosition(30, 70), 1000);
+    </script>
 </body>
 </html>
