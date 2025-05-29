@@ -2,28 +2,21 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Виртуальный тур с онлайн-панорамой</title>
+    <title>Виртуальный тур</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
     <style>
-        #panorama {
-            width: 100%;
-            height: 100vh;
-        }
+        #panorama { width: 100%; height: 100vh; }
     </style>
 </head>
 <body>
     <div id="panorama"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    
     <script>
         pannellum.viewer('panorama', {
-            "type": "equirectangular",  // Формат 360°
-            "panorama": "http://f1131181.xsph.ru/tuuur/gg.html",  // Ваша ссылка
-            "autoLoad": true,          // Автоматическая загрузка
-            "showControls": true,     // Показать кнопки управления
-            "compass": true,          // Добавить компас (если есть данные о направлении)
-            "hotSpotDebug": false     // Отладка горячих точек (необязательно)
+            "type": "equirectangular",
+            "panorama": "panorama.jpg",  // Укажите путь к вашей панораме
+            "autoLoad": true
         });
     </script>
 </body>
